@@ -13,10 +13,12 @@ import {
   useTheme,
   alpha,
 } from "@mui/material";
-import UploadFileIcon from "@mui/icons-material/UploadFile";
-import LinkIcon from "@mui/icons-material/Link";
-import ImageSearchIcon from "@mui/icons-material/ImageSearch";
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import {
+  ContentCopy,
+  ImageSearch,
+  Link,
+  UploadFile,
+} from "@mui/icons-material";
 import ReactCrop from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
 
@@ -243,19 +245,13 @@ function App() {
         py: { xs: 3, md: 6 },
       }}
     >
-      <Container maxWidth="xl" sx={{ maxWidth: "1400px" }}>
+      <Container maxWidth="xl">
         <Paper
-          elevation={4}
           sx={{
-            p: { xs: 2, sm: 3, md: 4 },
+            p: 4,
             mb: 4,
-            borderRadius: { xs: 1.5, md: 2 },
             maxWidth: "100%",
             mx: "auto",
-            background: `linear-gradient(145deg, ${
-              theme.palette.background.paper
-            }, ${alpha(theme.palette.background.paper, 0.9)})`,
-            boxShadow: `0 8px 32px ${alpha(theme.palette.primary.main, 0.1)}`,
           }}
         >
           <Typography
@@ -275,18 +271,16 @@ function App() {
 
           <Grid
             container
-            spacing={{ xs: 2, md: 3 }}
+            spacing={3}
             justifyContent={!imageSrc ? "center" : "flex-start"}
           >
             {/* Image Upload */}
-            <Grid size={{ xs: 12, md: imageSrc ? 6 : 8 }}>
+            <Grid size={{ xs: 12, md: 6 }}>
               <Paper
-                elevation={2}
                 sx={{
                   p: { xs: 1.5, sm: 2 },
                   borderRadius: { xs: 1.5, md: 2 },
                   height: "100%",
-                  background: alpha(theme.palette.background.paper, 0.8),
                 }}
               >
                 <Typography
@@ -302,7 +296,7 @@ function App() {
                     fontSize: { xs: "1.1rem", md: "1.25rem" },
                   }}
                 >
-                  <UploadFileIcon color="primary" />
+                  <UploadFile color="primary" />
                   Upload Image
                 </Typography>
                 <Button
@@ -316,7 +310,7 @@ function App() {
                     textTransform: "none",
                     fontSize: { xs: "0.9rem", md: "1rem" },
                   }}
-                  startIcon={<ImageSearchIcon />}
+                  startIcon={<ImageSearch />}
                 >
                   Select Image
                   <input
@@ -346,7 +340,7 @@ function App() {
                     fontSize: { xs: "1.1rem", md: "1.25rem" },
                   }}
                 >
-                  <LinkIcon color="primary" />
+                  <Link color="primary" />
                   Paste Image URL
                 </Typography>
                 <Box sx={{ display: "flex", gap: 1, mb: 1 }}>
@@ -406,7 +400,7 @@ function App() {
                       fontSize: { xs: "1.1rem", md: "1.25rem" },
                     }}
                   >
-                    <ImageSearchIcon color="primary" />
+                    <ImageSearch color="primary" />
                     Crop Image
                   </Typography>
                   <Box
@@ -479,7 +473,6 @@ function App() {
               )}
               {textResult && (
                 <Paper
-                  elevation={2}
                   sx={{
                     p: { xs: 1.5, sm: 2 },
                     borderRadius: { xs: 1.5, md: 2 },
@@ -509,13 +502,13 @@ function App() {
                         fontSize: { xs: "1.1rem", md: "1.25rem" },
                       }}
                     >
-                      <ContentCopyIcon color="primary" />
+                      <ContentCopy color="primary" />
                       Extracted Text
                     </Typography>
                     <Button
                       size="small"
                       variant="outlined"
-                      startIcon={<ContentCopyIcon />}
+                      startIcon={<ContentCopy />}
                       onClick={copyToClipboard}
                       sx={{
                         borderRadius: 1.5,
@@ -531,12 +524,14 @@ function App() {
                     multiline
                     rows={6}
                     value={textResult}
-                    InputProps={{
-                      readOnly: true,
-                      sx: {
-                        borderRadius: 1.5,
-                        fontFamily: "monospace",
-                        fontSize: { xs: "0.85rem", md: "0.9rem" },
+                    slotProps={{
+                      input: {
+                        readOnly: true,
+                        sx: {
+                          borderRadius: 1.5,
+                          fontFamily: "monospace",
+                          fontSize: { xs: "0.85rem", md: "0.9rem" },
+                        },
                       },
                     }}
                   />
