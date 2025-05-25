@@ -2,23 +2,6 @@
 
 A modern web application that allows users to extract text from images using OCR (Optical Character Recognition). Built with React, Material-UI, and the OCR.Space API.
 
-## Features
-
-- Upload images or paste image URLs
-- Interactive image cropping
-- Text extraction using OCR
-- Copy extracted text to clipboard
-- Responsive design
-- Modern UI with Material-UI components
-
-## Technologies Used
-
-- React 19
-- Vite
-- Material-UI
-- react-image-crop
-- OCR.Space API
-
 ## Getting Started
 
 1. Clone the repository
