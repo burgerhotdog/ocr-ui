@@ -24,11 +24,3 @@ npm run dev
 ```bash
 npm run build
 ```
-
-## Environment Variables
-
-The application uses the OCR.Space API. You'll need to replace the API key in `src/App.jsx` with your own key from [OCR.Space](https://ocr.space/ocrapi).
-
-## License
-
-MIT

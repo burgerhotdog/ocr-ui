@@ -1,11 +1,8 @@
-import React, { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   Container,
   Typography,
   Box,
-  Button,
-  TextField,
-  CircularProgress,
   Paper,
   Alert,
   Grid,
@@ -13,14 +10,7 @@ import {
   useTheme,
   alpha,
 } from "@mui/material";
-import {
-  ContentCopy,
-  ImageSearch,
-  Link,
-  UploadFile,
-} from "@mui/icons-material";
-import ReactCrop from "react-image-crop";
-import "react-image-crop/dist/ReactCrop.css";
+import { ImageSource, CropImage, ExtractedText } from "./components";
 
 function App() {
   const theme = useTheme();
@@ -29,59 +19,10 @@ function App() {
   const [crop, setCrop] = useState(initialCrop);
   const [completedCrop, setCompletedCrop] = useState(null);
   const [imageRef, setImageRef] = useState(null);
-  const [url, setUrl] = useState("");
   const [textResult, setTextResult] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [urlLoading, setUrlLoading] = useState(false);
   const [ocrLoading, setOcrLoading] = useState(false);
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
-
-  // Handle file upload
-  const handleFileChange = (e) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const reader = new FileReader();
-      reader.addEventListener("load", () => {
-        setImageSrc(reader.result);
-        // Reset crop when loading a new image
-        setCrop(initialCrop);
-        setCompletedCrop(initialCrop);
-      });
-      reader.readAsDataURL(e.target.files[0]);
-    }
-  };
-
-  // Handle URL submission
-  const handleUrlSubmit = () => {
-    if (url) {
-      setUrlLoading(true);
-      setError("");
-
-      // Create a new image to test loading
-      const testImg = new Image();
-      testImg.crossOrigin = "anonymous";
-
-      // Set up handlers for success and error
-      testImg.onload = () => {
-        setImageSrc(url);
-        setUrl("");
-        // Reset crop when loading a new image
-        setCrop(initialCrop);
-        setCompletedCrop(initialCrop);
-        setUrlLoading(false);
-      };
-
-      testImg.onerror = () => {
-        setError(
-          "Could not load image from URL. This may be due to CORS restrictions. Try uploading the file directly instead."
-        );
-        setUrlLoading(false);
-      };
-
-      // Start loading the image
-      testImg.src = url;
-    }
-  };
 
   // Handle image load
   const onImageLoad = (e) => {
@@ -211,6 +152,7 @@ function App() {
         },
         body: formData,
       });
+      console.log("apiResponse", apiResponse);
 
       const result = await apiResponse.json();
 
@@ -235,32 +177,28 @@ function App() {
   };
 
   return (
-    <Box
-      sx={{
-        minHeight: "100vh",
-        background: `linear-gradient(135deg, ${alpha(
-          theme.palette.primary.light,
-          0.1
-        )}, ${alpha(theme.palette.background.default, 0.9)})`,
-        py: { xs: 3, md: 6 },
-      }}
-    >
+    <Box sx={{
+      minHeight: "100vh",
+      background: `linear-gradient(135deg, ${alpha(
+        theme.palette.primary.light,
+        0.1
+      )}, ${alpha(theme.palette.background.default, 0.9)})`,
+      py: { xs: 3, md: 6 },
+    }}>
       <Container maxWidth="xl">
-        <Paper
-          sx={{
-            p: 4,
-            mb: 4,
-            maxWidth: "100%",
-            mx: "auto",
-          }}
-        >
+        <Paper sx={{
+          p: 4,
+          mb: 4,
+          maxWidth: "100%",
+          mx: "auto",
+        }}>
           <Typography
             variant="h4"
-            gutterBottom
             align="center"
+            color="primary"
+            gutterBottom
             sx={{
               fontWeight: 700,
-              color: theme.palette.primary.main,
               mb: { xs: 2, md: 4 },
               fontSize: { xs: "1.75rem", md: "2.25rem" },
             }}
@@ -276,185 +214,27 @@ function App() {
           >
             {/* Image Upload */}
             <Grid size={{ xs: 12, md: 6 }}>
-              <Paper
-                sx={{
-                  p: { xs: 1.5, sm: 2 },
-                  borderRadius: { xs: 1.5, md: 2 },
-                  height: "100%",
-                }}
-              >
-                <Typography
-                  variant="h6"
-                  gutterBottom
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 1,
-                    mb: { xs: 1.5, md: 2 },
-                    color: theme.palette.text.primary,
-                    fontWeight: 600,
-                    fontSize: { xs: "1.1rem", md: "1.25rem" },
-                  }}
-                >
-                  <UploadFile color="primary" />
-                  Upload Image
-                </Typography>
-                <Button
-                  variant="contained"
-                  component="label"
-                  fullWidth
-                  sx={{
-                    mb: 2,
-                    py: { xs: 1, md: 1.5 },
-                    borderRadius: 1.5,
-                    textTransform: "none",
-                    fontSize: { xs: "0.9rem", md: "1rem" },
-                  }}
-                  startIcon={<ImageSearch />}
-                >
-                  Select Image
-                  <input
-                    type="file"
-                    hidden
-                    accept="image/*"
-                    onChange={handleFileChange}
-                  />
-                </Button>
-
-                <Divider sx={{ my: 2 }}>
-                  <Typography variant="body2" color="text.secondary">
-                    OR
-                  </Typography>
-                </Divider>
-
-                <Typography
-                  variant="h6"
-                  gutterBottom
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 1,
-                    my: { xs: 1.5, md: 2 },
-                    color: theme.palette.text.primary,
-                    fontWeight: 600,
-                    fontSize: { xs: "1.1rem", md: "1.25rem" },
-                  }}
-                >
-                  <Link color="primary" />
-                  Paste Image URL
-                </Typography>
-                <Box sx={{ display: "flex", gap: 1, mb: 1 }}>
-                  <TextField
-                    fullWidth
-                    label="Image URL"
-                    value={url}
-                    onChange={(e) => setUrl(e.target.value)}
-                    size="small"
-                    variant="outlined"
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        borderRadius: 1.5,
-                      },
-                    }}
-                  />
-                  <Button
-                    variant="contained"
-                    onClick={handleUrlSubmit}
-                    disabled={!url || urlLoading}
-                    sx={{
-                      borderRadius: 1.5,
-                      px: { xs: 2, md: 3 },
-                      textTransform: "none",
-                    }}
-                  >
-                    {urlLoading ? <CircularProgress size={24} /> : "Load"}
-                  </Button>
-                </Box>
-              </Paper>
+              <ImageSource
+                initialCrop={initialCrop}
+                setImageSrc={setImageSrc}
+                setCrop={setCrop}
+                setCompletedCrop={setCompletedCrop}
+              />
             </Grid>
 
             {/* Crop and Result - Only shown when image is loaded */}
             {imageSrc && (
               <Grid size={{ xs: 12, md: 6 }}>
-                <Paper
-                  elevation={2}
-                  sx={{
-                    p: { xs: 1.5, sm: 2 },
-                    borderRadius: { xs: 1.5, md: 2 },
-                    background: alpha(theme.palette.background.paper, 0.8),
-                    display: "flex",
-                    flexDirection: "column",
-                    height: "100%",
-                  }}
-                >
-                  <Typography
-                    variant="h6"
-                    gutterBottom
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 1,
-                      color: theme.palette.text.primary,
-                      fontWeight: 600,
-                      mb: { xs: 1.5, md: 2 },
-                      fontSize: { xs: "1.1rem", md: "1.25rem" },
-                    }}
-                  >
-                    <ImageSearch color="primary" />
-                    Crop Image
-                  </Typography>
-                  <Box
-                    sx={{
-                      border: `1px solid ${alpha(theme.palette.divider, 0.5)}`,
-                      borderRadius: 1.5,
-                      p: 1,
-                      mb: 2,
-                      flex: 1,
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      overflow: "hidden",
-                    }}
-                  >
-                    <ReactCrop
-                      crop={crop}
-                      onChange={(_, percentCrop) => setCrop(percentCrop)}
-                      onComplete={(c) => setCompletedCrop(c)}
-                      aspect={undefined}
-                    >
-                      <img
-                        src={imageSrc}
-                        onLoad={onImageLoad}
-                        alt="Crop preview"
-                        crossOrigin="anonymous"
-                        style={{
-                          maxWidth: "100%",
-                          maxHeight: "300px",
-                          margin: "0 auto",
-                          display: "block",
-                        }}
-                      />
-                    </ReactCrop>
-                  </Box>
-                  <Button
-                    variant="contained"
-                    onClick={processOCR}
-                    disabled={ocrLoading}
-                    fullWidth
-                    sx={{
-                      py: { xs: 1, md: 1.5 },
-                      borderRadius: 1.5,
-                      textTransform: "none",
-                      fontSize: { xs: "0.9rem", md: "1rem" },
-                    }}
-                  >
-                    {ocrLoading ? (
-                      <CircularProgress size={24} color="inherit" />
-                    ) : (
-                      "Extract Text"
-                    )}
-                  </Button>
-                </Paper>
+                <CropImage 
+                  imageSrc={imageSrc}
+                  crop={crop}
+                  setCrop={setCrop}
+                  completedCrop={completedCrop}
+                  setCompletedCrop={setCompletedCrop}
+                  onImageLoad={onImageLoad}
+                  processOCR={processOCR}
+                  ocrLoading={ocrLoading}
+                />
               </Grid>
             )}
 
@@ -463,79 +243,17 @@ function App() {
               {error && (
                 <Alert
                   severity="error"
-                  sx={{
-                    mb: 2,
-                    borderRadius: 1.5,
-                  }}
+                  sx={{ mb: 2, borderRadius: 1.5}}
                 >
                   {error}
                 </Alert>
               )}
               {textResult && (
-                <Paper
-                  sx={{
-                    p: { xs: 1.5, sm: 2 },
-                    borderRadius: { xs: 1.5, md: 2 },
-                    maxWidth: "1000px",
-                    mx: "auto",
-                    background: alpha(theme.palette.background.paper, 0.8),
-                  }}
-                >
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      mb: { xs: 1.5, md: 2 },
-                      flexDirection: { xs: "column", sm: "row" },
-                      gap: { xs: 1, sm: 0 },
-                    }}
-                  >
-                    <Typography
-                      variant="h6"
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 1,
-                        color: theme.palette.text.primary,
-                        fontWeight: 600,
-                        fontSize: { xs: "1.1rem", md: "1.25rem" },
-                      }}
-                    >
-                      <ContentCopy color="primary" />
-                      Extracted Text
-                    </Typography>
-                    <Button
-                      size="small"
-                      variant="outlined"
-                      startIcon={<ContentCopy />}
-                      onClick={copyToClipboard}
-                      sx={{
-                        borderRadius: 1.5,
-                        textTransform: "none",
-                        px: { xs: 2, md: 2.5 },
-                      }}
-                    >
-                      {copied ? "Copied!" : "Copy"}
-                    </Button>
-                  </Box>
-                  <TextField
-                    fullWidth
-                    multiline
-                    rows={6}
-                    value={textResult}
-                    slotProps={{
-                      input: {
-                        readOnly: true,
-                        sx: {
-                          borderRadius: 1.5,
-                          fontFamily: "monospace",
-                          fontSize: { xs: "0.85rem", md: "0.9rem" },
-                        },
-                      },
-                    }}
-                  />
-                </Paper>
+                <ExtractedText
+                  textResult={textResult}
+                  copyToClipboard={copyToClipboard}
+                  copied={copied}
+                />
               )}
             </Grid>
           </Grid>
